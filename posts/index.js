@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const { randomBytes } = require("crypto");
 let Post = require("./models/post");
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 app.get('/posts', (req, res) => {
 	Post.find()
