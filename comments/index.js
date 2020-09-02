@@ -1,50 +1,70 @@
-const mongoose = require("mongoose");
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-let Comment = require('./modals/comments');
+const express = require('express');
+const bodyParser = require('body-parser');
+const { randomBytes } = require('crypto');
+const cors = require('cors');
+const axios = require('axios');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/posts/comments', (req, res) => {
-	Comment.find()
-		.then(comment => res.json(comment))
-		.catch(err => res.status(400).json('Error: ' + err));
-});
+const commentsByPostId = {};
 
 app.get('/posts/:id/comments', (req, res) => {
-	Comment.findById(req.params.id || [])
-		.then(comment => res.json(comment))
-		.catch(err => res.status(400).json('Error: ' + err));
+  res.send(commentsByPostId[req.params.id] || []);
 });
 
-app.post("/posts/:id/comments", (req, res) => {
-    const { content } = req.body;
+app.post('/posts/:id/comments', async (req, res) => {
+  const commentId = randomBytes(4).toString('hex');
+  const { content } = req.body;
 
-    const newComment = new Comment({
-        content,
+  const comments = commentsByPostId[req.params.id] || [];
+
+  comments.push({ id: commentId, content, status: 'pending' });
+
+  commentsByPostId[req.params.id] = comments;
+
+  await axios.post('http://localhost:4005/events', {
+    type: 'CommentCreated',
+    data: {
+      id: commentId,
+      content,
+      postId: req.params.id,
+      status: 'pending'
+    }
+  });
+
+  res.status(201).send(comments);
+});
+
+app.post('/events', async (req, res) => {
+  console.log('Event Received:', req.body.type);
+
+  const { type, data } = req.body;
+
+  if (type === 'CommentModerated') {
+    const { postId, id, status, content } = data;
+    const comments = commentsByPostId[postId];
+
+    const comment = comments.find(comment => {
+      return comment.id === id;
     });
-    
+    comment.status = status;
 
-    newComment.save()
-    .then(() => res.json(newComment))
-    .catch((err) => res.status(400).json("Error: " + err));
-    
-  });
+    await axios.post('http://localhost:4005/events', {
+      type: 'CommentUpdated',
+      data: {
+        id,
+        status,
+        postId,
+        content
+      }
+    });
+  }
 
-const PORT = 4000;
+  res.send({});
+});
 
-mongoose
-  .connect(
-    `mongodb+srv://seher:seher123@cluster0.si6tr.gcp.mongodb.net/miniblog?retryWrites=true&w=majority`,
-    { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
-  )
-  .then(() => {
-    app.listen(PORT || 4000);
-    console.log(`MongoDB has been connected and listening to Port ${PORT}`);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+app.listen(4001, () => {
+  console.log('Listening on 4001');
+});

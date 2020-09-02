@@ -1,44 +1,45 @@
-const mongoose = require("mongoose");
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const { randomBytes } = require("crypto");
-let Post = require("./models/post");
+const express = require('express');
+const bodyParser = require('body-parser');
+const { randomBytes } = require('crypto');
+const cors = require('cors');
+const axios = require('axios');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+const posts = {};
+
 app.get('/posts', (req, res) => {
-	Post.find()
-		.then(post => res.json(post))
-		.catch(err => res.status(400).json('Error: ' + err));
+  res.send(posts);
 });
 
-app.post("/posts", (req, res) => {
+app.post('/posts', async (req, res) => {
+  const id = randomBytes(4).toString('hex');
   const { title } = req.body;
 
-  const newPost = new Post({
-    title,
+  posts[id] = {
+    id,
+    title
+  };
+
+  await axios.post('http://localhost:4005/events', {
+    type: 'PostCreated',
+    data: {
+      id,
+      title
+    }
   });
 
-  newPost
-    .save()
-    .then(() => res.json(newPost))
-    .catch((err) => res.status(400).json("Error: " + err));
+  res.status(201).send(posts[id]);
 });
 
-const PORT = 5000;
+app.post('/events', (req, res) => {
+  console.log('Received Event', req.body.type);
 
-mongoose
-  .connect(
-    `mongodb+srv://seher:seher123@cluster0.si6tr.gcp.mongodb.net/miniblog?retryWrites=true&w=majority`,
-    { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
-  )
-  .then(() => {
-    app.listen(PORT || 5000);
-    console.log(`MongoDB has been connected and listening to Port ${PORT}`);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+  res.send({});
+});
+
+app.listen(4006, () => {
+  console.log('Listening on 4006');
+});

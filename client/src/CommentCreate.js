@@ -1,45 +1,42 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Grid from "@material-ui/core/Grid";
-import { Button, TextField } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Grid, Button, TextField } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
-  titleField: {
-    marginTop: "0.1em",
-  },
-  title: {
-    fontFamily: "Kalam",
-    fontWeight: 700,
-    fontSize: "2.5rem",
-    color: "#ff66a3",
-  },
-  submit: {
-    marginTop: "3em",
-    color: "white",
-    background: "linear-gradient(45deg, #f06292 20%, #9575cd 60%, #64b5f6 90%)",
-
-  },
-  titleLabel: {
-    marginTop: "2em",
-    [theme.breakpoints.down("sm")]: {
+    titleField: {
+      marginTop: "0.1em",
+    },
+    title: {
+      fontFamily: "Kalam",
+      fontWeight: 700,
+      fontSize: "2.5rem",
+      color: "#ff66a3",
+    },
+    submit: {
+      marginTop: "1.5em",
+      color: "white",
+      background: "linear-gradient(45deg, #f06292 20%, #9575cd 60%, #64b5f6 90%)",
+  
+    },
+    titleLabel: {
       marginTop: "1em",
     },
-  },
 }));
 
-export default () => {
+
+export default ({ postId }) => {
   const classes = useStyles();
-  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   const onSubmit = async event => {
     event.preventDefault();
 
-    await axios.post('http://localhost:4006/posts', {
-      title
+    await axios.post(`http://localhost:4001/posts/${postId}/comments`, {
+      content
     });
 
-    setTitle('');
+    setContent('');
   };
 
   return (
@@ -47,17 +44,15 @@ export default () => {
       item
       container
       direction="column"
-      justify="center"
-      alignItems="center"
     >
       <Grid item>
         <Grid item className={classes.titleLabel}>
-          <label>Title</label>
+          <label>New Comment</label>
         </Grid>
         <Grid item className={classes.titleField}>
           <TextField
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={content}
+            onChange={e => setContent(e.target.value)}
             color="secondary"
             placeholder="Title of your post"
             style={{ fontFamily: "Handlee" }}
