@@ -34,7 +34,7 @@ export default () => {
   const matchesXS = useMediaQuery(theme.breakpoints.down("xs"));
 
   const fetchPosts = async () => {
-    const res = await axios.get("http://localhost:4002/posts");
+    const res = await axios.get("http://posts-seher.com/posts");
 
     setPosts(res.data);
   };

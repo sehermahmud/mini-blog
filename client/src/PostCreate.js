@@ -35,7 +35,7 @@ export default () => {
   const onSubmit = async event => {
     event.preventDefault();
 
-    await axios.post('http://localhost:4006/posts', {
+    await axios.post('http://posts-seher.com/posts/create', {
       title
     });
 

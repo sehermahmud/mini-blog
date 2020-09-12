@@ -1,7 +1,7 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import { Card, CardContent, Button, Link } from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import PostCreate from "./PostCreate";
@@ -10,15 +10,15 @@ import PostList from "./PostList";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "36em",
-    height: "33em",
+    height: "27em",
     marginBottom: "3em",
     [theme.breakpoints.down("sm")]: {
       width: "36em",
-      height: "33em",
+      height: "27em",
     },
     [theme.breakpoints.down("xs")]: {
       width: "22em",
-      height: "38em",
+      height: "30em",
     },
   },
   title: {
@@ -76,22 +76,9 @@ export default () => {
                     interactive. It's all free and simple. Please read the
                     guides for you to know how the system works in this website.
                     If you are thinking it's just a small post of sharing names
-                    and writing comments, yeah you're write but there is a
-                    difference and warnings that you should know before posting
-                    any post
+                    and writing comments
                   </Typography>
                 </Grid>
-                <br />
-                <Button
-                  color="primary"
-                  variant="outlined"
-                  component={Link}
-                  href="/guide"
-                >
-                  <Typography className={classes.guideButton}>
-                    Guides
-                  </Typography>
-                </Button>
                 <PostCreate />
               </Grid>
             </CardContent>
